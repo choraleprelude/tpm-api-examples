@@ -2,10 +2,10 @@
 
 ## Prerequisites
 
-TPM2-TSS needs to be installed and library/include paths known:
+- TPM2-TSS needs to be installed and library/include paths known:
     https://github.com/tpm2-software/tpm2-tss
-    
-mkdir target
+  - Then update the library and include paths of the makefiles used for Linux/Windows  
+- mkdir target
 
 ## if linux
 make
