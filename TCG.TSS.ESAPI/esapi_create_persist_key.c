@@ -15,6 +15,7 @@ https://github.com/tpm2-software/tpm2-tools/blob/master/lib/tpm2_util.c
 #include <unistd.h>
 
 #include <tss2/tss2_esys.h>
+#include <tss2/tss2_tctildr.h>
 
 bool tpm2_util_string_to_uint32(const char *str, uint32_t *value) {
 
@@ -372,21 +373,26 @@ void create_and_load_rsa_key(ESYS_CONTEXT *ectx, ESYS_TR parent, ESYS_TR *aes_ke
 
 int main(int argc, char *argv[]) {
 
-	/*
-	 * create a connection to the TPM letting ESAPI choose how to get there.
-	 * If you need more control, you can use tcti and tcti-ldr libraries to
-	 * get a TCTI pointer to use for the tcti argument of Esys_Initialize.
-	 */
-	fprintf(stderr, "****************************\n");
-	fprintf(stderr, "* DO NOT USE IN PRODUCTION *\n");
-	fprintf(stderr, "****************************\n");
+    if (argc < 4) {
+        printf("Usage: esapi_create_persist_key hierarchy keyHandle tcti (e.g.: esapi_create_persist_key o 0x81000005 mssim)\n");
+        return 1;
+    }
+
+    /* Prepare TCTI context */
+    const char *tcti_name = argv[3];
+    TSS2_TCTI_CONTEXT *tcti_ctx = NULL;
+    TSS2_RC rc = Tss2_TctiLdr_Initialize (tcti_name, &tcti_ctx);
+    if (rc != TSS2_RC_SUCCESS) {
+        printf ("\nError: Tss2_TctiLdr_Initialize, response code: 0x%" PRIx32 "\n", rc);                
+        exit (1);
+    }
 
 	printf("main: initializing esys\n");
 
 	ESYS_CONTEXT *ectx = NULL;
 
 	TSS2_RC rv = Esys_Initialize(&ectx,
-			NULL, /* let it find the TCTI */
+			tcti_ctx, /* pass in TCTI */
 			NULL);/* Use whatever ABI */
 	if (rv != TSS2_RC_SUCCESS) {
 		fprintf(stderr, "Esys_Initialize: 0x%x\n", rv);
