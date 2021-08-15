@@ -123,7 +123,11 @@ void create_primary(ESYS_CONTEXT *ectx, ESYS_TR *parent) {
 // Referencing integration test code re: template for RSA keys:
 //    https://github.com/tpm2-software/tpm2-tss/blob/master/test/integration/esys-save-and-load-context.int.c
 
-void create_and_load_rsa_key(ESYS_CONTEXT *ectx, ESYS_TR parent, ESYS_TR *aes_key, char *key_handle, unsigned char *key_auth) {
+void create_and_load_rsa_key(ESYS_CONTEXT *ectx, ESYS_TR parent, ESYS_TR *aes_key, char *key_handle, char *key_auth) {
+
+    BYTE *key_auth_param = (BYTE *) key_auth;
+
+	printf("keyhandle:%s, keyauth:%s, keyauth param:%s\n", key_handle, key_auth, key_auth_param);
 
     TPM2B_PUBLIC pub_templ = {
         .size = 0,
@@ -175,8 +179,10 @@ void create_and_load_rsa_key(ESYS_CONTEXT *ectx, ESYS_TR parent, ESYS_TR *aes_ke
             .userAuth = {
 				/* TODO: Set this to a non-hard coded password, or better yet use a policy */
                  .size = 8,
-//                 .buffer = *key_auth
-                 .buffer = "password"
+                 .buffer = {key_auth[0], key_auth[1], key_auth[2], key_auth[3] 
+                   , key_auth[4], key_auth[5], key_auth[6], key_auth[7]}
+//                 .buffer = *key_auth_param
+//                 .buffer = "password"
                  ,
              },
             .data = {
@@ -191,8 +197,6 @@ void create_and_load_rsa_key(ESYS_CONTEXT *ectx, ESYS_TR parent, ESYS_TR *aes_ke
     TPM2B_CREATION_DATA *creationData = NULL;
     TPM2B_DIGEST *creationHash = NULL;
     TPMT_TK_CREATION *creationTicket = NULL;
-
-	printf("keyhandle:%s, keauth:%s\n", key_handle, key_auth);
 
     TSS2_RC rv = Esys_Create(
 		ectx,
