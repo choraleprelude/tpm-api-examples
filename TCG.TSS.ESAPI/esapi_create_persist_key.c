@@ -135,7 +135,7 @@ void create_primary(ESYS_CONTEXT *ectx, ESYS_TR *parent, char *hierarchy) {
 // Referencing integration test code re: template for RSA keys:
 //    https://github.com/tpm2-software/tpm2-tss/blob/master/test/integration/esys-save-and-load-context.int.c
 
-void create_and_load_rsa_key(ESYS_CONTEXT *ectx, ESYS_TR parent, ESYS_TR *aes_key, char *hierarchy, char *key_handle, char *key_auth) {
+void create_and_load_rsa_key(ESYS_CONTEXT *ectx, ESYS_TR parent, ESYS_TR *rsa_key, char *hierarchy, char *key_handle, char *key_auth) {
 
 	printf("keyhandle:%s, keyauth:%s\n", key_handle, key_auth);
 
@@ -191,8 +191,6 @@ void create_and_load_rsa_key(ESYS_CONTEXT *ectx, ESYS_TR parent, ESYS_TR *aes_ke
                  .size = 8,
                  .buffer = {key_auth[0], key_auth[1], key_auth[2], key_auth[3] 
                    , key_auth[4], key_auth[5], key_auth[6], key_auth[7]}
-//                 .buffer = *key_auth_param
-//                 .buffer = "password"
                  ,
              },
             .data = {
@@ -238,7 +236,7 @@ void create_and_load_rsa_key(ESYS_CONTEXT *ectx, ESYS_TR parent, ESYS_TR *aes_ke
 			ESYS_TR_NONE,
 			outPrivate,
 			outPublic,
-			aes_key);
+			rsa_key);
 	if (rv != TSS2_RC_SUCCESS) {
 		fprintf(stderr, "Esys_Load: 0x%x\n", rv);
 		exit(1);
@@ -268,7 +266,7 @@ void create_and_load_rsa_key(ESYS_CONTEXT *ectx, ESYS_TR parent, ESYS_TR *aes_ke
 	ESYS_TR out_tr;
     rv = Esys_EvictControl (ectx,
             hierarchy_choice,
-            *aes_key,
+            *rsa_key,
 			ESYS_TR_PASSWORD,
 			ESYS_TR_NONE,
 			ESYS_TR_NONE,    
@@ -311,8 +309,8 @@ int main(int argc, char *argv[]) {
 	ESYS_TR parent = ESYS_TR_NONE;
 	create_primary(ectx, &parent, argv[1]);
 
-	ESYS_TR aes_key = ESYS_TR_NONE;
-	create_and_load_rsa_key(ectx, parent, &aes_key, argv[1], argv[2], argv[3]);
+	ESYS_TR rsa_key = ESYS_TR_NONE;
+	create_and_load_rsa_key(ectx, parent, &rsa_key, argv[1], argv[2], argv[3]);
 
 	Esys_Finalize(&ectx);
 
