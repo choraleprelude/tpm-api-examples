@@ -45,7 +45,7 @@ bool tpm2_util_string_to_uint32(const char *str, uint32_t *value) {
     return true;
 }
 
-void create_primary(ESYS_CONTEXT *ectx, ESYS_TR *parent) {
+void create_primary(ESYS_CONTEXT *ectx, ESYS_TR *parent, char *hierarchy) {
 
     TPM2B_PUBLIC pub_templ = {
 		.publicArea = {
@@ -109,7 +109,19 @@ void create_primary(ESYS_CONTEXT *ectx, ESYS_TR *parent) {
     TPM2B_DIGEST *creationHash = NULL;
     TPMT_TK_CREATION *creationTicket = NULL;
 
-    TSS2_RC rv = Esys_CreatePrimary(ectx, ESYS_TR_RH_OWNER, ESYS_TR_PASSWORD,
+    // Configure hierarchy input
+    ESYS_TR hierarchy_choice;
+
+    if (strcmp(hierarchy, "o") == 0) {
+        hierarchy_choice = ESYS_TR_RH_OWNER;
+    } else if (strcmp(hierarchy, "p") == 0) {
+        hierarchy_choice = ESYS_TR_RH_PLATFORM;
+    } else {
+		fprintf(stderr, "Wrong hierarchy parameter: %s\n", hierarchy);
+		exit(1);
+    }
+
+    TSS2_RC rv = Esys_CreatePrimary(ectx, hierarchy_choice, ESYS_TR_PASSWORD,
                            ESYS_TR_NONE, ESYS_TR_NONE, &inSensitive, &pub_templ,
                            &outsideInfo, &creationPCR, parent,
                            &outPublic, &creationData, &creationHash,
@@ -123,11 +135,9 @@ void create_primary(ESYS_CONTEXT *ectx, ESYS_TR *parent) {
 // Referencing integration test code re: template for RSA keys:
 //    https://github.com/tpm2-software/tpm2-tss/blob/master/test/integration/esys-save-and-load-context.int.c
 
-void create_and_load_rsa_key(ESYS_CONTEXT *ectx, ESYS_TR parent, ESYS_TR *aes_key, char *key_handle, char *key_auth) {
+void create_and_load_rsa_key(ESYS_CONTEXT *ectx, ESYS_TR parent, ESYS_TR *aes_key, char *hierarchy, char *key_handle, char *key_auth) {
 
-    BYTE *key_auth_param = (BYTE *) key_auth;
-
-	printf("keyhandle:%s, keyauth:%s, keyauth param:%s\n", key_handle, key_auth, key_auth_param);
+	printf("keyhandle:%s, keyauth:%s\n", key_handle, key_auth);
 
     TPM2B_PUBLIC pub_templ = {
         .size = 0,
@@ -243,9 +253,21 @@ void create_and_load_rsa_key(ESYS_CONTEXT *ectx, ESYS_TR parent, ESYS_TR *aes_ke
 		printf("persist_handle: %#x\n", persist_handle);
 	}
 
+    // Configure hierarchy input
+    ESYS_TR hierarchy_choice;
+
+    if (strcmp(hierarchy, "o") == 0) {
+        hierarchy_choice = ESYS_TR_RH_OWNER;
+    } else if (strcmp(hierarchy, "p") == 0) {
+        hierarchy_choice = ESYS_TR_RH_PLATFORM;
+    } else {
+		fprintf(stderr, "Wrong hierarchy parameter: %s\n", hierarchy);
+		exit(1);
+    }
+
 	ESYS_TR out_tr;
     rv = Esys_EvictControl (ectx,
-            ESYS_TR_RH_OWNER,
+            hierarchy_choice,
             *aes_key,
 			ESYS_TR_PASSWORD,
 			ESYS_TR_NONE,
@@ -261,7 +283,7 @@ void create_and_load_rsa_key(ESYS_CONTEXT *ectx, ESYS_TR parent, ESYS_TR *aes_ke
 int main(int argc, char *argv[]) {
 
     if (argc < 5) {
-        printf("Usage: esapi_create_persist_key hierarchy keyHandle keyauth tcti (e.g.: esapi_create_persist_key o 0x81000005 password mssim)\n");
+        printf("Usage: esapi_create_persist_key hierarchy keyHandle keyauth tcti (e.g.: esapi_create_persist_key o 0x81000005 password mssim)\n  Note: (please set keyauth length = 8) \n");
         return 1;
     }
 
@@ -287,10 +309,10 @@ int main(int argc, char *argv[]) {
 	}
 
 	ESYS_TR parent = ESYS_TR_NONE;
-	create_primary(ectx, &parent);
+	create_primary(ectx, &parent, argv[1]);
 
 	ESYS_TR aes_key = ESYS_TR_NONE;
-	create_and_load_rsa_key(ectx, parent, &aes_key, argv[2], argv[3]);
+	create_and_load_rsa_key(ectx, parent, &aes_key, argv[1], argv[2], argv[3]);
 
 	Esys_Finalize(&ectx);
 
