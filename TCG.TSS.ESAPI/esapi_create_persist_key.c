@@ -280,13 +280,13 @@ void create_and_load_rsa_key(ESYS_CONTEXT *ectx, ESYS_TR parent, ESYS_TR *rsa_ke
 
 int main(int argc, char *argv[]) {
 
-    if (argc < 5) {
-        printf("Usage: esapi_create_persist_key hierarchy keyHandle keyauth tcti (e.g.: esapi_create_persist_key o 0x81000005 password mssim)\n  Note: (please set keyauth length = 8) \n");
+    if (argc < 6) {
+        printf("Usage: esapi_create_persist_key hierarchy hierarchyauth keyHandle keyauth tcti (e.g.: esapi_create_persist_key o ownerauth 0x81000005 password mssim)\n  Notes: (Please set keyauth length = 8) \n  Notes: Set hierarchyauth = NULL if no auth for hierarchy\n");
         return 1;
     }
 
     /* Prepare TCTI context */
-    const char *tcti_name = argv[4];
+    const char *tcti_name = argv[5];
     TSS2_TCTI_CONTEXT *tcti_ctx = NULL;
     TSS2_RC rc = Tss2_TctiLdr_Initialize (tcti_name, &tcti_ctx);
     if (rc != TSS2_RC_SUCCESS) {
@@ -306,11 +306,44 @@ int main(int argc, char *argv[]) {
 		return 1;
 	}
 
+    // set hierarchy auth
+    TPM2B_AUTH h_authValue = {
+        .size = 0,
+        .buffer = {}
+    };    
+
+    if (strcmp(argv[2], "NULL") != 0) {
+        char *h_auth = argv[2];
+
+        h_authValue.size = strlen(h_auth);
+        for (int i = 0; i < h_authValue.size; i++) {
+            h_authValue.buffer[i] = h_auth[i];
+        }
+    }
+
+    // Configure hierarchy input
+    ESYS_TR hierarchy_choice;
+
+    if (strcmp(argv[1], "o") == 0) {
+        rv = Esys_TR_SetAuth(ectx, ESYS_TR_RH_OWNER, &h_authValue);
+    } else if (strcmp(argv[1], "p") == 0) {
+        rv = Esys_TR_SetAuth(ectx, ESYS_TR_RH_PLATFORM, &h_authValue);
+    } else {
+		fprintf(stderr, "Wrong hierarchy parameter (main): %s\n", argv[1]);
+		exit(1);
+    }
+
+    if (rv != TSS2_RC_SUCCESS) {
+		fprintf(stderr, "TR_SetAuth error: 0x%x\n", rv);
+		return 1;
+	}
+
+    // Create primary and rsa keys and persist
 	ESYS_TR parent = ESYS_TR_NONE;
 	create_primary(ectx, &parent, argv[1]);
 
 	ESYS_TR rsa_key = ESYS_TR_NONE;
-	create_and_load_rsa_key(ectx, parent, &rsa_key, argv[1], argv[2], argv[3]);
+	create_and_load_rsa_key(ectx, parent, &rsa_key, argv[1], argv[3], argv[4]);
 
 	Esys_Finalize(&ectx);
 
