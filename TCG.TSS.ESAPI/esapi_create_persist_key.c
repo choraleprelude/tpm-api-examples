@@ -193,9 +193,8 @@ void create_and_load_rsa_key(ESYS_CONTEXT *ectx, ESYS_TR parent, ESYS_TR *rsa_ke
         .sensitive = {
             .userAuth = {
 				/* TODO: Set this to a non-hard coded password, or better yet use a policy */
-                 .size = 8,
-                 .buffer = {key_auth[0], key_auth[1], key_auth[2], key_auth[3] 
-                   , key_auth[4], key_auth[5], key_auth[6], key_auth[7]}
+                 .size = 0,
+                 .buffer = {}
                  ,
              },
             .data = {
@@ -204,6 +203,13 @@ void create_and_load_rsa_key(ESYS_CONTEXT *ectx, ESYS_TR parent, ESYS_TR *rsa_ke
              }
         }
     };
+
+    if (strcmp(key_auth, "NULL") != 0) {
+        inSensitive.sensitive.userAuth.size = strlen(key_auth);
+        for (int i = 0; i < inSensitive.sensitive.userAuth.size; i++) {
+            inSensitive.sensitive.userAuth.buffer[i] = key_auth[i];
+        }
+    }
 
     TPM2B_PRIVATE *outPrivate = NULL;
     TPM2B_PUBLIC *outPublic = NULL;
@@ -286,7 +292,7 @@ void create_and_load_rsa_key(ESYS_CONTEXT *ectx, ESYS_TR parent, ESYS_TR *rsa_ke
 int main(int argc, char *argv[]) {
 
     if (argc < 6) {
-        printf("Usage: esapi_create_persist_key hierarchy hierarchyauth keyHandle keyauth tcti (e.g.: esapi_create_persist_key o ownerauth 0x81000005 password mssim)\n  Notes: (Please set keyauth length = 8) \n  Notes: Set hierarchyauth = NULL if no auth for hierarchy\n");
+        printf("Usage: esapi_create_persist_key hierarchy hierarchyauth keyHandle keyauth tcti (e.g.: esapi_create_persist_key o ownerauth 0x81000005 password mssim)\n   Notes: Set hierarchy or key auth = NULL if no password needed\n");
         return 1;
     }
 
@@ -327,8 +333,6 @@ int main(int argc, char *argv[]) {
     }
 
     // Configure hierarchy input
-    ESYS_TR hierarchy_choice;
-
     if (strcmp(argv[1], "o") == 0) {
         rv = Esys_TR_SetAuth(ectx, ESYS_TR_RH_OWNER, &h_authValue);
     } else if (strcmp(argv[1], "p") == 0) {
