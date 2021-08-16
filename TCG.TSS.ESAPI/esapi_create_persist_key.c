@@ -3,6 +3,11 @@ Based on examples from:
 
 https://gist.github.com/williamcroberts/66a7dab3adfb973fbae3219954535009
 https://github.com/tpm2-software/tpm2-tools/blob/master/lib/tpm2_util.c
+https://github.com/tpm2-software/tpm2-tss/blob/master/test/integration/esys-save-and-load-context.int.c
+
+1. Create primary key
+2. Create child key with primary key as parent
+3. Persist the child key with evictcontrol
 
 */
 
@@ -344,6 +349,19 @@ int main(int argc, char *argv[]) {
 
 	ESYS_TR rsa_key = ESYS_TR_NONE;
 	create_and_load_rsa_key(ectx, parent, &rsa_key, argv[1], argv[3], argv[4]);
+
+    // flush all transient objects
+    rv = Esys_FlushContext(ectx, parent);
+    if (rv != TSS2_RC_SUCCESS) {
+		fprintf(stderr, "Error during FlushContext - parent: 0x%x\n", rv);
+		exit(1);
+	}    
+
+    rv = Esys_FlushContext(ectx, rsa_key);
+    if (rv != TSS2_RC_SUCCESS) {
+		fprintf(stderr, "Error during FlushContext - rsa_key: 0x%x\n", rv);
+		exit(1);
+	}
 
 	Esys_Finalize(&ectx);
 
