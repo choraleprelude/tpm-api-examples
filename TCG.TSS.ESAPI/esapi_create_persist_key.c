@@ -76,14 +76,14 @@ void create_primary(ESYS_CONTEXT *ectx, ESYS_TR *parent, char *hierarchy) {
 			 },
 			.unique.rsa = {
 				 .size = 0,
-				 .buffer = {},
-			 },
-		},
+				 .buffer = {0}
+			 }
+		}
     };
 
     TPM2B_DATA outsideInfo = {
         .size = 0,
-        .buffer = {}
+        .buffer = {0}
         ,
     };
 
@@ -172,7 +172,7 @@ void create_and_load_rsa_key(ESYS_CONTEXT *ectx, ESYS_TR parent, ESYS_TR *rsa_ke
              },
             .unique.rsa = {
                  .size = 0,
-                 .buffer = {}
+                 .buffer = {0}
                  ,
              }
         }
@@ -192,7 +192,7 @@ void create_and_load_rsa_key(ESYS_CONTEXT *ectx, ESYS_TR parent, ESYS_TR *rsa_ke
             .userAuth = {
 				/* TODO: Set this to a non-hard coded password, or better yet use a policy */
                  .size = 0,
-                 .buffer = {}
+                 .buffer = {0}
                  ,
              },
             .data = {
@@ -318,7 +318,7 @@ int main(int argc, char *argv[]) {
     // set hierarchy auth
     TPM2B_AUTH h_authValue = {
         .size = 0,
-        .buffer = {}
+        .buffer = {0}
     };    
 
     if (strcmp(argv[2], "NULL") != 0) {
