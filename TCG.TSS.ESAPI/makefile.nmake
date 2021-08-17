@@ -1,5 +1,7 @@
-all: esapi_getrandom
+all: esapi_getrandom esapi_create_persist_key
 
 esapi_getrandom: esapi_getrandom.c
    cl /Fo".\target\esapi_getrandom" /Fe".\target\esapi_getrandom.exe" -I "D:\git\tpm2-tss\include" esapi_getrandom.c /link /LIBPATH:"D:\usr\local\lib" tss2-esys.lib tss2-tctildr.lib 
 
+esapi_create_persist_key: esapi_create_persist_key.c
+   cl /Fo".\target\esapi_create_persist_key" /Fe".\target\esapi_create_persist_key.exe" -I "D:\git\tpm2-tss\include" esapi_create_persist_key.c /link /LIBPATH:"D:\usr\local\lib" tss2-esys.lib tss2-tctildr.lib 
