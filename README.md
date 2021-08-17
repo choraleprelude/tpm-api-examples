@@ -6,3 +6,6 @@ Examples of how to use TPM APIs for basic use cases
 - Set key auth
 - Persist keys into TPM
 - Flush context
+
+## Notes
+These are sample code to demonstrate how to use TPM APIs. Additional improvements may be needed to make the code more robust, e.g.: add proper error handling to flush context, etc.
