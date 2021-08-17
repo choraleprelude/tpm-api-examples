@@ -17,8 +17,6 @@ https://github.com/tpm2-software/tpm2-tss/blob/master/test/integration/esys-save
 #include <stdlib.h>
 #include <string.h>
 
-#include <unistd.h>
-
 #include <tss2/tss2_esys.h>
 #include <tss2/tss2_tctildr.h>
 
