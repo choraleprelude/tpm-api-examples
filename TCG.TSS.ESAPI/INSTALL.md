@@ -14,3 +14,5 @@ make
 
 ## if windows
 nmake /f makefile.nmake
+
+Notes: Run as administrator in Windows if calling the create key API's
