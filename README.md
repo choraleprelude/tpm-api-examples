@@ -5,6 +5,8 @@ Examples of how to use TPM APIs for basic use cases
 - Pass hierarchy and hierarchy auth during tpm access - owner, platform
 - Set key auth
 - Persist keys into TPM
+- Delete persistent key from TPM
+- Get TPM capability
 - Flush context
 
 ## Notes
