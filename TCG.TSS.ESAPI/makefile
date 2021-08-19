@@ -1,4 +1,4 @@
-all: esapi_getrandom esapi_create_persist_key
+all: esapi_getrandom esapi_create_persist_key esapi_getcap
 
 esapi_getrandom: esapi_getrandom.c
 	gcc -o target/esapi_getrandom esapi_getrandom.c -L=/usr/local/lib/ -ltss2-esys -ltss2-tctildr -I/usr/local/include
@@ -6,5 +6,7 @@ esapi_getrandom: esapi_getrandom.c
 esapi_create_persist_key: esapi_create_persist_key.c
 	gcc -o target/esapi_create_persist_key esapi_create_persist_key.c -L=/usr/local/lib/ -ltss2-esys -ltss2-tctildr -I/usr/local/include
 
+esapi_getcap: esapi_getcap.c
+	gcc -o target/esapi_getcap esapi_getcap.c -L=/usr/local/lib/ -ltss2-esys -ltss2-tctildr -I/usr/local/include
 
 
