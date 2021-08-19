@@ -216,9 +216,6 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    // int rand_size;
-    // sscanf (argv[1],"%d",&rand_size);
-
     /* Prepare TCTI context */
     const char *tcti_name = argv[2];
     TSS2_TCTI_CONTEXT *tcti_ctx = NULL;
@@ -269,11 +266,6 @@ int main(int argc, char *argv[]) {
 
     bool result = dump_tpm_capability(capability, property, &capabilityData->data);
 
-    // printf("\n");
-    // for (int i = 0; i < random_bytes->size; i++) {
-    //     printf("0x%x ", random_bytes->buffer[i]);
-    // }
-    // printf("\n");
     exit(0);
 }
 
