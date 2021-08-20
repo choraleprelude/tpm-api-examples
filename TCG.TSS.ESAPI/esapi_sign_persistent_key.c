@@ -25,6 +25,13 @@ Sign a blob with an existing persistent key
         } \
     } while(0)
 
+typedef enum tpm2_convert_sig_fmt tpm2_convert_sig_fmt;
+enum tpm2_convert_sig_fmt {
+    signature_format_tss,
+    signature_format_plain,
+    signature_format_err
+};
+
 static size_t readx(FILE *f, UINT8 *data, size_t size) {
 
     size_t bread = 0;
@@ -160,6 +167,111 @@ bool files_write_bytes(FILE *out, uint8_t bytes[], size_t len) {
     return writex(out, bytes, len);
 }
 
+UINT8 *tpm2_convert_sig(UINT16 *size, TPMT_SIGNATURE *signature) {
+
+    UINT8 *buffer = NULL;
+    *size = 0;
+
+    switch (signature->sigAlg) {
+    case TPM2_ALG_RSASSA:
+        *size = signature->signature.rsassa.sig.size;
+        buffer = malloc(*size);
+        if (!buffer) {
+            goto nomem;
+        }
+        memcpy(buffer, signature->signature.rsassa.sig.buffer, *size);
+        break;
+    case TPM2_ALG_RSAPSS:
+        *size = signature->signature.rsapss.sig.size;
+        buffer = malloc(*size);
+        if (!buffer) {
+            goto nomem;
+        }
+        memcpy(buffer, signature->signature.rsapss.sig.buffer, *size);
+        break;
+    // case TPM2_ALG_HMAC: {
+    //     TPMU_HA *hmac_sig = &(signature->signature.hmac.digest);
+    //     *size = tpm2_alg_util_get_hash_size(signature->signature.hmac.hashAlg);
+    //     if (*size == 0) {
+    //         LOG_ERR("Hash algorithm %d has 0 size",
+    //                 signature->signature.hmac.hashAlg);
+    //         goto nomem;
+    //     }
+    //     buffer = malloc(*size);
+    //     if (!buffer) {
+    //         goto nomem;
+    //     }
+    //     memcpy(buffer, hmac_sig, *size);
+    //     break;
+    //}
+    // case TPM2_ALG_ECDSA: {
+    //     return extract_ecdsa(&signature->signature.ecdsa, size);
+    // }
+    default:
+        printf("%s: unknown signature scheme: 0x%x", __func__,
+                signature->sigAlg);
+        return NULL;
+    }
+
+    return buffer;
+nomem:
+    printf("%s: couldn't allocate memory", __func__);
+    return NULL;
+}
+
+bool output_enabled = true;
+
+bool files_save_bytes_to_file(const char *path, UINT8 *buf, UINT16 size) {
+
+    if (!buf) {
+        return false;
+    }
+
+    if (!path && !output_enabled) {
+        return true;
+    }
+
+    FILE *fp = path ? fopen(path, "wb+") : stdout;
+    if (!fp) {
+        printf("Could not open file \"%s\", error: %s", path, strerror(errno));
+        return false;
+    }
+
+    bool result = files_write_bytes(fp, buf, size);
+    if (!result) {
+        printf("Could not write data to file \"%s\"", path ? path : "<stdout>");
+    }
+
+    if (fp != stdout) {
+        fclose(fp);
+    }
+
+    return result;
+}
+
+bool tpm2_convert_sig_save(TPMT_SIGNATURE *signature,
+        tpm2_convert_sig_fmt format, const char *path) {
+
+    switch (format) {
+    case signature_format_plain: {
+        UINT8 *buffer;
+        UINT16 size;
+
+        buffer = tpm2_convert_sig(&size, signature);
+        if (buffer == NULL) {
+            return false;
+        }
+
+        bool ret = files_save_bytes_to_file(path, buffer, size);
+        free(buffer);
+        return ret;
+    }
+    default:
+        printf("Unsupported signature output format.");
+        return false;
+    }
+}
+
 bool tpm2_util_string_to_uint32(const char *str, uint32_t *value) {
 
     char *endptr;
@@ -265,13 +377,6 @@ int main(int argc, char *argv[]) {
 	}
 
     TPMI_ALG_HASH halg;
-    TPMT_SIG_SCHEME in_scheme = {
-                      .scheme = TPM2_ALG_RSAPSS,
-                      .details = {
-                          .rsapss = { .hashAlg = TPM2_ALG_SHA256 }
-                      }
-    };
-
     if (strcmp(argv[4], "sha256") == 0) {
         halg = TPM2_ALG_SHA256;
     } else {
@@ -299,6 +404,16 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
+    // Need to set signature scheme since the signing key does not have a scheme in these sample code (hard-coded!)
+    // Default for RSA shall be: TPM2_ALG_RSASSA
+    //   references: https://github.com/tpm2-software/tpm2-tools/blob/master/lib/tpm2_alg_util.c
+    TPMT_SIG_SCHEME in_scheme = {
+                      .scheme = TPM2_ALG_RSASSA,
+                      .details = {
+                          .rsapss = { .hashAlg = TPM2_ALG_SHA256 }
+                      }
+    };
+
     // Sign the digest
     TPMT_SIGNATURE *signature;
     rv = Esys_Sign(ectx, keyHandle,
@@ -309,6 +424,16 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
+    // output signature
+    // Choose signature format as plain for openssl compatibility
+    char *signature_output_path = argv[6];
+    tpm2_convert_sig_fmt sig_format = signature_format_plain;
+
+    result = tpm2_convert_sig_save(signature, sig_format, signature_output_path);
+    if (!result) {
+        printf("Signature save error\n");
+        return 1;
+    }
 
 /*
     // read input message and create digest for signing
