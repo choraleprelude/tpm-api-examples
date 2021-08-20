@@ -1,5 +1,5 @@
 all: esapi_getrandom esapi_create_persist_key esapi_getcap \
-         esapi_delete_persistent_key esapi_rsadecrypt_persistent_key
+         esapi_delete_persistent_key esapi_rsadecrypt_persistent_key esapi_sign_persistent_key
 
 esapi_getrandom: esapi_getrandom.c
 	gcc -o target/esapi_getrandom esapi_getrandom.c -L=/usr/local/lib/ -ltss2-esys -ltss2-tctildr -I/usr/local/include
@@ -15,3 +15,7 @@ esapi_delete_persistent_key: esapi_delete_persistent_key.c
 
 esapi_rsadecrypt_persistent_key: esapi_rsadecrypt_persistent_key.c
 	gcc -o target/esapi_rsadecrypt_persistent_key esapi_rsadecrypt_persistent_key.c -L=/usr/local/lib/ -ltss2-esys -ltss2-tctildr -I/usr/local/include
+
+esapi_sign_persistent_key: esapi_sign_persistent_key.c
+	gcc -o target/esapi_sign_persistent_key esapi_sign_persistent_key.c -L=/usr/local/lib/ -ltss2-esys -ltss2-tctildr -I/usr/local/include
+
