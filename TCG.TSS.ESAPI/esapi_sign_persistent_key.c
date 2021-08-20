@@ -4,6 +4,10 @@ Based on example from:
 
 Sign a blob with an existing persistent key
 
+1. Create hash digest from input message
+2. Sign digest with existing persistent key
+3. Output signature
+
 */
 
 #include <stdbool.h>
@@ -435,97 +439,6 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-/*
-    // read input message and create digest for signing
-    char *input_file = argv[4];
-    FILE *input = input_file ? fopen(input_file, "rb") : stdin;
-    if (!input) {
-        printf("Could not open file \"%s\"\n", input_file);
-        return 1;
-    }
-
-    TPMT_TK_HASHCHECK *temp_validation_ticket;
-
-    rc = tpm2_hash_file(ectx, halg, TPM2_RH_OWNER, input, &digest,
-            &temp_validation_ticket);
-    if (input != stdin) {
-        fclose(input);
-    }
-
-    if (rc != tool_rc_success) {
-        printf("Could not hash input\n");
-        return 1;
-    } else {
-        validation = *temp_validation_ticket;
-    }
-
-    free(temp_validation_ticket);     */
-
-
-/*
-    // verify key algorithm
-    TPM2B_PUBLIC *key_public_info = 0;
-    rv = Esys_ReadPublic(ectx, keyHandle,
-            ESYS_TR_NONE, ESYS_TR_NONE, ESYS_TR_NONE,
-            &key_public_info, NULL, NULL);
-    if (rv != TPM2_RC_SUCCESS) {
-		fprintf(stderr, "Esys_ReadPublic error: 0x%x\n", rv);
-		return 1;
-    }    
-
-    if (key_public_info->publicArea.type != TPM2_ALG_RSA) {
-		fprintf(stderr, "Unsupported key type for RSA decryption\n");
-		return 1;        
-    }    
-
-    // 
-    //  * Read enc data blob
-    //  
-    TPM2B_PUBLIC_KEY_RSA cipher_text;
-    cipher_text.size = BUFFER_SIZE(TPM2B_PUBLIC_KEY_RSA, buffer);
-    
-    result = files_load_bytes_from_path(argv[3], cipher_text.buffer, &cipher_text.size);
-    if (!result) {
-		fprintf(stderr, "Input reading error\n");
-		return 1;            
-    }
-
-    TPM2B_PUBLIC_KEY_RSA *message = NULL;
-    TPMT_RSA_DECRYPT scheme;
-
-    // 
-    // Default padding scheme: 0x15 or rsaes for TPM_ALG_RSAES
-    // https://github.com/tpm2-software/tpm2-tools/blob/master/man/tpm2_rsadecrypt.1.md
-    // https://github.com/tpm2-software/tpm2-tools/blob/master/man/common/signschemes.md
-    // 
-    scheme.scheme = 0x15;
-
-    rv = Esys_RSA_Decrypt(ectx, keyHandle,
-            ESYS_TR_PASSWORD, ESYS_TR_NONE, ESYS_TR_NONE, &cipher_text,
-            &scheme, NULL, &message);
-    if (rv != TPM2_RC_SUCCESS) {
-		fprintf(stderr, "Esys_RSA_Decrypt error: 0x%x\n", rv);
-		return 1;
-    }
-
-    bool ret = false;
-    char *decrypted_output_path = argv[4];
-    FILE *f =
-            decrypted_output_path ? fopen(decrypted_output_path, "wb+") : stdout;
-    if (!f) {
-		fprintf(stderr, "Cannot open output file\n");
-		return 1;
-    }
-
-    printf ("Decrypted message size:%d\n", message->size);
-
-    ret = files_write_bytes(f, message->buffer, message->size);
-    if (f != stdout) {
-        fclose(f);
-    }
-
-    free(message);
-*/    
     exit(0);
 }
 
