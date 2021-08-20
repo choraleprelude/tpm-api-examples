@@ -7,6 +7,8 @@ Examples of how to use TPM APIs for basic use cases
 - Persist keys into TPM
 - Delete persistent key from TPM
 - Get TPM capability
+- Decrypt data with persistent key
+- Sign data with persistent key
 - Flush context
 
 ## Notes
