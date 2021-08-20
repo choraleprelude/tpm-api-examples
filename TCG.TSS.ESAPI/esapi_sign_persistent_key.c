@@ -265,6 +265,13 @@ int main(int argc, char *argv[]) {
 	}
 
     TPMI_ALG_HASH halg;
+    TPMT_SIG_SCHEME in_scheme = {
+                      .scheme = TPM2_ALG_RSAPSS,
+                      .details = {
+                          .rsapss = { .hashAlg = TPM2_ALG_SHA256 }
+                      }
+    };
+
     if (strcmp(argv[4], "sha256") == 0) {
         halg = TPM2_ALG_SHA256;
     } else {
@@ -272,9 +279,7 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    /*
-     * Read input data
-     */
+    // Read input data
     TPM2B_MAX_BUFFER input_data;
     input_data.size = BUFFER_SIZE(TPM2B_MAX_BUFFER, buffer);
     
@@ -291,6 +296,16 @@ int main(int argc, char *argv[]) {
             halg, hierarchy_choice, &digest, &validation);
     if (rv != TSS2_RC_SUCCESS) {
         printf("Esys_Hash error: \"%x\"\n", rv);
+        return 1;
+    }
+
+    // Sign the digest
+    TPMT_SIGNATURE *signature;
+    rv = Esys_Sign(ectx, keyHandle,
+            ESYS_TR_PASSWORD, ESYS_TR_NONE, ESYS_TR_NONE, digest,
+            &in_scheme, validation, &signature);
+    if (rv != TPM2_RC_SUCCESS) {
+        printf("Esys_Sign error: \"%x\"\n", rv);
         return 1;
     }
 
