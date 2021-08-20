@@ -17,6 +17,14 @@ Decrypt a blob with an existing persistent key
 
 #define BUFFER_SIZE(type, field) (sizeof((((type *)NULL)->field)))
 
+#define BAIL_ON_NULL(param, x) \
+    do { \
+        if (!x) { \
+            printf(param" must be specified\n"); \
+            return false; \
+        } \
+    } while(0)
+
 static size_t readx(FILE *f, UINT8 *data, size_t size) {
 
     size_t bread = 0;
@@ -122,6 +130,32 @@ bool files_load_bytes_from_path(const char *path, UINT8 *buf, UINT16 *size) {
 
     fclose(f);
     return result;
+}
+
+static bool writex(FILE *f, UINT8 *data, size_t size) {
+
+    size_t wrote = 0;
+    size_t index = 0;
+    do {
+        wrote = fwrite(&data[index], 1, size, f);
+        if (wrote != size) {
+            if (errno != EINTR) {
+                return false;
+            }
+            /* continue on EINTR */
+        }
+        size -= wrote;
+        index += wrote;
+    } while (size > 0);
+
+    return true;
+}
+
+bool files_write_bytes(FILE *out, uint8_t bytes[], size_t len) {
+
+    BAIL_ON_NULL("FILE", out);
+    BAIL_ON_NULL("bytes", bytes);
+    return writex(out, bytes, len);
 }
 
 bool tpm2_util_string_to_uint32(const char *str, uint32_t *value) {
@@ -248,6 +282,33 @@ int main(int argc, char *argv[]) {
 		return 1;            
     }
 
+    TPM2B_PUBLIC_KEY_RSA *message = NULL;
+    TPMT_RSA_DECRYPT scheme;
+    scheme.scheme = TPM2_ALG_NULL;
+
+    rv = Esys_RSA_Decrypt(ectx, keyHandle,
+            ESYS_TR_PASSWORD, ESYS_TR_NONE, ESYS_TR_NONE, &cipher_text,
+            &scheme, NULL, &message);
+    if (rv != TPM2_RC_SUCCESS) {
+		fprintf(stderr, "Esys_RSA_Decrypt error: 0x%x\n", rv);
+		return 1;
+    }
+
+    bool ret = false;
+    char *decrypted_output_path = argv[4];
+    FILE *f =
+            decrypted_output_path ? fopen(decrypted_output_path, "wb+") : stdout;
+    if (!f) {
+		fprintf(stderr, "Cannot open output file\n");
+		return 1;
+    }
+
+    ret = files_write_bytes(f, message->buffer, message->size);
+    if (f != stdout) {
+        fclose(f);
+    }
+
+    free(message);
     // remove persistent handle
 	// ESYS_TR out_tr;
     // rv = Esys_EvictControl (ectx,
