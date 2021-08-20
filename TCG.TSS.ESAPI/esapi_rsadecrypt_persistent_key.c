@@ -284,7 +284,13 @@ int main(int argc, char *argv[]) {
 
     TPM2B_PUBLIC_KEY_RSA *message = NULL;
     TPMT_RSA_DECRYPT scheme;
-    scheme.scheme = TPM2_ALG_NULL;
+
+    /*
+    Default padding scheme: 0x15 or rsaes for TPM_ALG_RSAES
+    https://github.com/tpm2-software/tpm2-tools/blob/master/man/tpm2_rsadecrypt.1.md
+    https://github.com/tpm2-software/tpm2-tools/blob/master/man/common/signschemes.md
+    */    
+    scheme.scheme = 0x15;
 
     rv = Esys_RSA_Decrypt(ectx, keyHandle,
             ESYS_TR_PASSWORD, ESYS_TR_NONE, ESYS_TR_NONE, &cipher_text,
@@ -303,27 +309,14 @@ int main(int argc, char *argv[]) {
 		return 1;
     }
 
+    printf ("Decrypted message size:%d\n", message->size);
+
     ret = files_write_bytes(f, message->buffer, message->size);
     if (f != stdout) {
         fclose(f);
     }
 
     free(message);
-    // remove persistent handle
-	// ESYS_TR out_tr;
-    // rv = Esys_EvictControl (ectx,
-    //         hierarchy_choice,
-    //         keyHandle,
-	// 		ESYS_TR_PASSWORD,
-	// 		ESYS_TR_NONE,
-	// 		ESYS_TR_NONE,    
-	// 		persist_handle,
-	// 		&out_tr);
-    // if (rv != TSS2_RC_SUCCESS) {
-	// 	fprintf(stderr, "Error: Esys_EvictControl: 0x%x\n", rv);
-	// 	exit(1);
-	// }    
-
     exit(0);
 }
 
