@@ -17,5 +17,5 @@ esapi_rsadecrypt_persistent_key: esapi_rsadecrypt_persistent_key.c
 	gcc -o target/esapi_rsadecrypt_persistent_key esapi_rsadecrypt_persistent_key.c -L=/usr/local/lib/ -ltss2-esys -ltss2-tctildr -I/usr/local/include
 
 esapi_sign_persistent_key: esapi_sign_persistent_key.c
-	gcc -o target/esapi_sign_persistent_key esapi_sign_persistent_key.c -L=/usr/local/lib/ -ltss2-esys -ltss2-tctildr -I/usr/local/include
+	gcc -o target/esapi_sign_persistent_key esapi_sign_persistent_key.c -L=/usr/local/lib/ -ltss2-esys -ltss2-tctildr -ltss2-mu -I/usr/local/include
 

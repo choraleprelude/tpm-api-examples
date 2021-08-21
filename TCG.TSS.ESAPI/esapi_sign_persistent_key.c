@@ -18,6 +18,7 @@ Sign a blob with an existing persistent key
 
 #include <tss2/tss2_esys.h>
 #include <tss2/tss2_tctildr.h>
+#include <tss2/tss2_mu.h>
 
 #define BUFFER_SIZE(type, field) (sizeof((((type *)NULL)->field)))
 
@@ -253,10 +254,25 @@ bool files_save_bytes_to_file(const char *path, UINT8 *buf, UINT16 size) {
     return result;
 }
 
+bool files_save_signature(TPMT_SIGNATURE *signature, const char *path)
+{
+    size_t offset = 0;
+    UINT8 buffer[sizeof(*signature)];
+    TSS2_RC rc = Tss2_MU_TPMT_SIGNATURE_Marshal(signature, buffer, sizeof(buffer), &offset);
+    if (rc != TSS2_RC_SUCCESS)
+    {
+        printf("Error serializing signature structure: 0x%x", rc);
+        return false;
+    }
+    return files_save_bytes_to_file(path, buffer, offset);
+}
+
 bool tpm2_convert_sig_save(TPMT_SIGNATURE *signature,
         tpm2_convert_sig_fmt format, const char *path) {
 
     switch (format) {
+    case signature_format_tss:
+        return files_save_signature(signature, path);        
     case signature_format_plain: {
         UINT8 *buffer;
         UINT16 size;
@@ -303,13 +319,13 @@ int main(int argc, char *argv[]) {
 
     TSS2_RC rv;
 
-    if (argc < 8) {
-        printf("Usage: esapi_sign_persistent_key hierarchy keyHandle keyauth alg input_data signature_output tcti \n     (e.g.: esapi_sign_persistent_key o 0x81000005 password sha256 data.txt signature.file mssim)\n");
+    if (argc < 9) {
+        printf("Usage: esapi_sign_persistent_key hierarchy keyHandle keyauth alg input_data signature_output sig_format tcti \n     (e.g.: esapi_sign_persistent_key o 0x81000005 password sha256 data.txt signature.file plain mssim)\n");
         return 1;
     }
 
     /* Prepare TCTI context */
-    const char *tcti_name = argv[7];
+    const char *tcti_name = argv[8];
     TSS2_TCTI_CONTEXT *tcti_ctx = NULL;
     TSS2_RC rc = Tss2_TctiLdr_Initialize (tcti_name, &tcti_ctx);
     if (rc != TSS2_RC_SUCCESS) {
@@ -428,11 +444,22 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    // output signature
-    // Choose signature format as plain for openssl compatibility
-    char *signature_output_path = argv[6];
-    tpm2_convert_sig_fmt sig_format = signature_format_plain;
+    // Set signature format, see: https://github.com/tpm2-software/tpm2-tools/blob/master/man/common/signature.md
+    //    - plain for openssl compatibility
+    //    - tss for TPM use
+    tpm2_convert_sig_fmt sig_format;
 
+    if (strcmp(argv[7], "plain") == 0) {
+        sig_format = signature_format_plain;
+    } else if (strcmp(argv[7], "tss") == 0) {
+        sig_format = signature_format_tss;
+    } else {
+        printf("Unsupported signature format: \"%s\"\n", argv[7]);
+        return 1;        
+    }
+
+    // output signature
+    char *signature_output_path = argv[6];
     result = tpm2_convert_sig_save(signature, sig_format, signature_output_path);
     if (!result) {
         printf("Signature save error\n");
