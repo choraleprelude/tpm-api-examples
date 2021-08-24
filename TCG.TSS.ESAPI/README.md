@@ -14,7 +14,10 @@ make
 
 ### Running in linux
 
-See below windows examples. Just replace tcti from tbs to device (or mssim/swtpm for tpm simulator) 
+See below windows examples. Just replace tcti from `tbs` to 
+- device (HW TPM) or
+- mssim (microsoft tpm simulator) or
+- swtpm (tpm simulator)
 
 ## if windows
 nmake /f makefile.nmake
