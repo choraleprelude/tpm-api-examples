@@ -1,4 +1,4 @@
-all: esapi_getrandom esapi_create_persist_key esapi_getcap esapi_delete_persistent_key
+all: esapi_getrandom esapi_create_persist_key esapi_getcap esapi_delete_persistent_key esapi_rsadecrypt_persistent_key esapi_sign_persistent_key
 
 esapi_getrandom: esapi_getrandom.c
    cl /Fo".\target\esapi_getrandom" /Fe".\target\esapi_getrandom.exe" -I "D:\git\tpm2-tss\include" esapi_getrandom.c /link /LIBPATH:"D:\usr\local\lib" tss2-esys.lib tss2-tctildr.lib 
@@ -11,3 +11,9 @@ esapi_getcap: esapi_getcap.c
 
 esapi_delete_persistent_key: esapi_delete_persistent_key.c
    cl /Fo".\target\esapi_delete_persistent_key" /Fe".\target\esapi_delete_persistent_key.exe" -I "D:\git\tpm2-tss\include" esapi_delete_persistent_key.c /link /LIBPATH:"D:\usr\local\lib" tss2-esys.lib tss2-tctildr.lib 
+
+esapi_rsadecrypt_persistent_key: esapi_rsadecrypt_persistent_key.c
+   cl /Fo".\target\esapi_rsadecrypt_persistent_key" /Fe".\target\esapi_rsadecrypt_persistent_key.exe" -I "D:\git\tpm2-tss\include" esapi_rsadecrypt_persistent_key.c /link /LIBPATH:"D:\usr\local\lib" tss2-esys.lib tss2-tctildr.lib
+
+esapi_sign_persistent_key: esapi_sign_persistent_key.c
+   cl /Fo".\target\esapi_sign_persistent_key" /Fe".\target\esapi_sign_persistent_key.exe" -I "D:\git\tpm2-tss\include" esapi_sign_persistent_key.c /link /LIBPATH:"D:\usr\local\lib" tss2-esys.lib tss2-tctildr.lib tss2-mu.lib  
