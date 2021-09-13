@@ -47,7 +47,7 @@ $esapi_getcap handles-persistent tbs
 - 0x81810022
 ```
 
-### Additional sample code running in Linux
+## Additional sample code running in Linux
 
 ```
 $mkdir testimport2
