@@ -16,6 +16,7 @@ make
 
 See below windows examples. Just replace tcti from `tbs` to 
 - device (HW TPM) or
+- tabrmd (resource manager) or
 - mssim (microsoft tpm simulator) or
 - swtpm (tpm simulator)
 
