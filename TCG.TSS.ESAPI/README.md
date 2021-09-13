@@ -48,6 +48,7 @@ $esapi_getcap handles-persistent tbs
 ```
 
 ## Additional sample code running in Linux
+- Notes: openssl and [tpm-tools](https://github.com/tpm2-software/tpm2-tools) are also needed to complete the test steps below:
 
 ```
 $mkdir testimport2
