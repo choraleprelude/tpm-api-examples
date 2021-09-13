@@ -9,6 +9,10 @@ Examples of how to use TPM APIs for basic use cases
 - Get TPM capability
 - Decrypt data with persistent key
 - Sign data with persistent key
+- Read public key from a persistent ky in TPM
+- Read NV data
+- Import an openssl RSA key into TPM and persist it
+- Decode TPM return code message with Tss2_RC_Decode()
 - Flush context
 
 ## Notes
