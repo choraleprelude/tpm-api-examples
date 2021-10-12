@@ -105,9 +105,9 @@ Decrypted message size:22
 
 # Developing in a docker container
 
-A docker container image is also provided for fast prototyping, with all environments set up already in a Ubuntu 18.04 LTS image.
+A docker image is also provided for fast prototyping, with all environments set up already in a Ubuntu 18.04 LTS image.
 
-Container link in docker hub: https://hub.docker.com/repository/docker/choraleprelude/ubuntu-tpm-dev-env
+Link to docker hub: https://hub.docker.com/repository/docker/choraleprelude/ubuntu-tpm-dev-env
 
 ## Running the docker container
 
