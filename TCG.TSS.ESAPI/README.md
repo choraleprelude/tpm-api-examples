@@ -139,5 +139,4 @@ make
 
 # Run the example code and start developing!
 ./target/esapi_getrandom 12 mssim
-
 ```
