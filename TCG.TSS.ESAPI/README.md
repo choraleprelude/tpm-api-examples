@@ -102,3 +102,42 @@ $./target/esapi_rsadecrypt_persistent_key 0x81810018 newkeyauth ./testimport2/ne
 persist_handle: 0x81810018
 Decrypted message size:22
 ```
+
+# Developing in a docker container
+
+A docker container image is also provided for fast prototyping, with all environments set up already in a Ubuntu 18.04 LTS image.
+
+Container link in docker hub: https://hub.docker.com/repository/docker/choraleprelude/ubuntu-tpm-dev-env
+
+## Running the docker container
+
+sudo docker run -u root --rm -it choraleprelude/ubuntu-tpm-dev-env
+
+## Start TPM2.0 simulator
+
+cd /tpm/ibmtpm/src
+
+./tpm_server
+
+## Initiate/Verify TPM commands in another shell
+
+From host machine, open another shell and key:
+- sudo docker exec -ti -u root CONTAINER_ID bash
+- tpm2_startup -c -T mssim
+- tpm2_getrandom 6 -T mssim |xxd
+
+### Start developing with TCG TSS ESAPI in this shell!
+
+```
+git clone git@github.com:choraleprelude/tpm-api-examples.git
+
+cd tpm-api-examples/TCG.TSS.ESAPI
+
+# Build the example code
+mkdir target
+make
+
+# Run the example code and start developing!
+./target/esapi_getrandom 12 mssim
+
+```
