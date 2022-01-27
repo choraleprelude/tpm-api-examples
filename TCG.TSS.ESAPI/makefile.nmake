@@ -1,4 +1,4 @@
-all: esapi_getrandom esapi_create_persist_key esapi_getcap esapi_delete_persistent_key esapi_rsadecrypt_persistent_key esapi_sign_persistent_key
+all: esapi_getrandom esapi_create_persist_key esapi_getcap esapi_delete_persistent_key esapi_rsadecrypt_persistent_key esapi_sign_persistent_key esapi_readpublic_persistent_key esapi_nvread_persistent esapi_import_persist_openssl_key
 
 esapi_getrandom: esapi_getrandom.c
    cl /Fo".\target\esapi_getrandom" /Fe".\target\esapi_getrandom.exe" -I "D:\git\tpm2-tss\include" esapi_getrandom.c /link /LIBPATH:"D:\usr\local\lib" tss2-esys.lib tss2-tctildr.lib 
@@ -7,7 +7,7 @@ esapi_create_persist_key: esapi_create_persist_key.c
    cl /Fo".\target\esapi_create_persist_key" /Fe".\target\esapi_create_persist_key.exe" -I "D:\git\tpm2-tss\include" esapi_create_persist_key.c /link /LIBPATH:"D:\usr\local\lib" tss2-esys.lib tss2-tctildr.lib 
 
 esapi_getcap: esapi_getcap.c
-   cl /Fo".\target\esapi_getcap" /Fe".\target\esapi_getcap.exe" -I "D:\git\tpm2-tss\include" esapi_getcap.c /link /LIBPATH:"D:\usr\local\lib" tss2-esys.lib tss2-tctildr.lib 
+   cl /Fo".\target\esapi_getcap" /Fe".\target\esapi_getcap.exe" -I "D:\git\tpm2-tss\include" esapi_getcap.c /link /LIBPATH:"D:\usr\local\lib" tss2-esys.lib tss2-tctildr.lib tss2-rc.lib
 
 esapi_delete_persistent_key: esapi_delete_persistent_key.c
    cl /Fo".\target\esapi_delete_persistent_key" /Fe".\target\esapi_delete_persistent_key.exe" -I "D:\git\tpm2-tss\include" esapi_delete_persistent_key.c /link /LIBPATH:"D:\usr\local\lib" tss2-esys.lib tss2-tctildr.lib 
@@ -17,3 +17,13 @@ esapi_rsadecrypt_persistent_key: esapi_rsadecrypt_persistent_key.c
 
 esapi_sign_persistent_key: esapi_sign_persistent_key.c
    cl /Fo".\target\esapi_sign_persistent_key" /Fe".\target\esapi_sign_persistent_key.exe" -I "D:\git\tpm2-tss\include" esapi_sign_persistent_key.c /link /LIBPATH:"D:\usr\local\lib" tss2-esys.lib tss2-tctildr.lib tss2-mu.lib  
+
+esapi_readpublic_persistent_key: esapi_readpublic_persistent_key.c
+   cl /Fo".\target\esapi_readpublic_persistent_key" /Fe".\target\esapi_readpublic_persistent_key.exe" -I "D:\git\tpm2-tss\include" -I "C:\Program Files\OpenSSL-Win64\include" esapi_readpublic_persistent_key.c /link /LIBPATH:"D:\usr\local\lib" tss2-esys.lib tss2-tctildr.lib tss2-rc.lib /LIBPATH:"C:\Program Files\OpenSSL-Win64\lib" libcrypto.lib libssl.lib
+
+esapi_nvread_persistent: esapi_nvread_persistent.c
+   cl /Fo".\target\esapi_nvread_persistent" /Fe".\target\esapi_nvread_persistent.exe" -I "D:\git\tpm2-tss\include" -I "C:\Program Files\OpenSSL-Win64\include" esapi_nvread_persistent.c /link /LIBPATH:"D:\usr\local\lib" tss2-esys.lib tss2-tctildr.lib tss2-rc.lib /LIBPATH:"C:\Program Files\OpenSSL-Win64\lib" libcrypto.lib libssl.lib
+
+esapi_import_persist_openssl_key: esapi_import_persist_openssl_key.c
+   cl /Fo".\target\esapi_import_persist_openssl_key" /Fe".\target\esapi_import_persist_openssl_key.exe" -I "D:\git\tpm2-tss\include" -I "C:\Program Files\OpenSSL-Win64\include" esapi_import_persist_openssl_key.c /link /LIBPATH:"D:\usr\local\lib" tss2-esys.lib tss2-tctildr.lib tss2-rc.lib tss2-mu.lib /LIBPATH:"C:\Program Files\OpenSSL-Win64\lib" libcrypto.lib libssl.lib
+   

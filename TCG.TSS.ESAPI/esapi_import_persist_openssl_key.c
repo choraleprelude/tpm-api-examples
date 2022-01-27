@@ -713,7 +713,13 @@ bool tpm2_alg_util_handle_ext_alg(const char *alg_spec, TPM2B_PUBLIC *public) {
     char *tok = NULL;
     char *saveptr = NULL;
     unsigned i = 0;
+
+#ifdef __linux__     
     while ((tok = strtok_r(b, ":", &saveptr))) {
+#elif _WIN32
+    // https://stackoverflow.com/questions/39501494/strtok-r-unresolved-external-symbol    
+    while ((tok = strtok_s(b, ":", &saveptr))) {
+#endif
         b = NULL;
 
         switch (i) {
