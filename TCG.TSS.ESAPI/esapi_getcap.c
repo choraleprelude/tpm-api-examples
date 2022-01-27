@@ -13,6 +13,7 @@ Get capability
 
 #include <tss2/tss2_esys.h>
 #include <tss2/tss2_tctildr.h>
+#include <tss2/tss2_rc.h>
 
 /* convenience macro to convert flags into "1" / "0" strings */
 #define prop_str(val) val ? "1" : "0"
@@ -212,7 +213,7 @@ int main(int argc, char *argv[]) {
     TSS2_RC r;
 
     if (argc < 3) {
-        printf("Usage: esapi_getcap capability tcti (e.g.: esapi_getcap handles-persistent mssim)\n   Notes: Supported capabilities: (handles-persistent, properties-variable)\n");
+        printf("Usage: esapi_getcap capability tcti (e.g.: esapi_getcap handles-persistent mssim)\n   Notes: Supported capabilities: (handles-persistent, handles-nv-index, properties-variable)\n");
         return 1;
     }
 
@@ -245,6 +246,10 @@ int main(int argc, char *argv[]) {
         capability = TPM2_CAP_HANDLES;
         property = TPM2_PERSISTENT_FIRST;
         propertyCount = TPM2_MAX_CAP_HANDLES;
+    } else if (strcmp(argv[1], "handles-nv-index") == 0) {
+        capability = TPM2_CAP_HANDLES;
+        property = TPM2_NV_INDEX_FIRST;
+        propertyCount = TPM2_MAX_CAP_HANDLES;
     } else if (strcmp(argv[1], "properties-variable") == 0) {
         capability = TPM2_CAP_TPM_PROPERTIES;
         property = TPM2_PT_VAR;
@@ -260,7 +265,7 @@ int main(int argc, char *argv[]) {
                            &moreData, &capabilityData);
 
     if (r != TSS2_RC_SUCCESS){
-		fprintf(stderr, "Error: Esys_GetCapability: 0x%x\n", r);
+        printf("Esys_GetCapability error: (0x%X) - %s\n", r, Tss2_RC_Decode(r));
         exit(1);
     }
 

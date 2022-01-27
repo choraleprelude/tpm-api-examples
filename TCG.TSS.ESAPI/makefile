@@ -9,7 +9,7 @@ esapi_create_persist_key: esapi_create_persist_key.c
 	gcc -o target/esapi_create_persist_key esapi_create_persist_key.c -L=/usr/local/lib/ -ltss2-esys -ltss2-tctildr -I/usr/local/include
 
 esapi_getcap: esapi_getcap.c
-	gcc -o target/esapi_getcap esapi_getcap.c -L=/usr/local/lib/ -ltss2-esys -ltss2-tctildr -I/usr/local/include
+	gcc -o target/esapi_getcap esapi_getcap.c -L=/usr/local/lib/ -ltss2-esys -ltss2-tctildr -ltss2-rc -I/usr/local/include
 
 esapi_delete_persistent_key: esapi_delete_persistent_key.c
 	gcc -o target/esapi_delete_persistent_key esapi_delete_persistent_key.c -L=/usr/local/lib/ -ltss2-esys -ltss2-tctildr -I/usr/local/include
