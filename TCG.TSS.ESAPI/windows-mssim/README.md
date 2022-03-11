@@ -1,5 +1,5 @@
 ## Why are we here
-  - If for some reasons, the mssim TCTI could not be loaded in windows, you can follow the source code in this page to explicitly initiate the mssim TCTI.
+  - If for some reasons, the mssim TCTI could not be loaded in windows (and you don't have time to experiment with the TSS library build parameters), you can follow the example code in this page to explicitly initiate the mssim TCTI.
   - Reference: https://www.mankier.com/3/Tss2_Tcti_Mssim_Init
 
 ## Run Microsoft TPM simulator
