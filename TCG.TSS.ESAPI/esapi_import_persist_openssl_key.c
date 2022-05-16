@@ -17,6 +17,11 @@ https://github.com/tpm2-software/tpm2-tools/blob/master/tools/tpm2_import.c
 #include <stdlib.h>
 #include <string.h>
 
+#ifdef _WIN32
+    // See APPLINK runtime error: https://github.com/eclipse/paho.mqtt.c/issues/457
+    #include <openssl/applink.c>
+#endif
+
 #include <openssl/pem.h>
 #include <openssl/err.h>
 #include <openssl/rand.h>
