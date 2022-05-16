@@ -9,6 +9,10 @@
 - Create target directory from current directory for binary outputs
   - mkdir target
 
+### Tested library release information
+- tpm2-tss: release 3.1.0
+- openssl: release 1.1.1 
+
 ## if linux
 make
 
@@ -31,20 +35,20 @@ Notes: Run as administrator in Windows if calling the create key API's
 $esapi_getrandom 12 tbs
 0x66 0xf9 0x6c 0x64 0xa3 0x70 0x86 0xd2 0xa1 0x26 0x6b 0x2b
 
-$esapi_create_persist_key p NULL 0x81810015 password tbs
+$esapi_create_persist_key o NULL 0x81000015 password tbs
 main: initializing esys
-keyhandle:0x81810015, keyauth:password
-persist_handle: 0x81810015
+keyhandle:0x81000015, keyauth:password
+persist_handle: 0x81000015
 
 $esapi_getcap handles-persistent tbs
-- 0x81810015
-- 0x81810022
+- 0x81000015
+- 0x81000022
 
-$esapi_delete_persistent_key p NULL 0x81810015 tbs
-persist_handle: 0x81810015
+$esapi_delete_persistent_key o NULL 0x81000015 tbs
+persist_handle: 0x81000015
 
 $esapi_getcap handles-persistent tbs
-- 0x81810022
+- 0x81000022
 ```
 
 ## Additional sample code running in Linux
