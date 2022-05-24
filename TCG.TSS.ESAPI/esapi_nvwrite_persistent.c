@@ -136,17 +136,37 @@ int main(int argc, char *argv[]) {
     int nvsize = atoi(argv[6]);
     int nvindex = atoi(argv[3]);
 
+    TPMA_NV ownerAttributes = (
+                TPMA_NV_OWNERWRITE |
+                TPMA_NV_OWNERREAD |
+                TPMA_NV_AUTHWRITE |
+                TPMA_NV_AUTHREAD
+                );
+
+    TPMA_NV platformAttributes = (
+                TPMA_NV_PPWRITE |
+                TPMA_NV_PPREAD |
+                TPMA_NV_AUTHWRITE |
+                TPMA_NV_AUTHREAD |
+                TPMA_NV_PLATFORMCREATE |
+                TPMA_NV_WRITE_STCLEAR |
+                TPMA_NV_READ_STCLEAR
+                );
+
+    TPMA_NV nvAttributes;
+
+    if (strcmp(argv[1], "o") == 0) {
+        nvAttributes = ownerAttributes;            
+    } else if (strcmp(argv[1], "p") == 0) {
+        nvAttributes = platformAttributes;
+    }    
+
     TPM2B_NV_PUBLIC publicInfo = {
         .size = 0,
         .nvPublic = {
             .nvIndex =TPM2_NV_INDEX_FIRST + nvindex,
             .nameAlg = TPM2_ALG_SHA256,
-            .attributes = (
-                TPMA_NV_OWNERWRITE |
-                TPMA_NV_OWNERREAD |
-                TPMA_NV_AUTHWRITE |
-                TPMA_NV_AUTHREAD
-                ),
+            .attributes = nvAttributes,
             .authPolicy = {
                  .size = 0,
                  .buffer = {}
